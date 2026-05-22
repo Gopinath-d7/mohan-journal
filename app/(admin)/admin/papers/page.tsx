@@ -33,7 +33,7 @@ export default async function AdminPapersPage() {
                 </td>
               </tr>
             ) : (
-              papers.map((paper) => (
+              papers.map((paper: any) => (
                 <tr key={paper.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <p className="text-sm font-medium text-gray-900 max-w-xs truncate">
