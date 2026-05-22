@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  AUTHOR
+  READER
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PUBLISHED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          Role      @default(READER)
+  affiliation   String?
+  bio           String?
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  papers        Paper[]
+  reviews       Review[]
+}
+
+model Journal {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  description String
+  coverImage  String?
+  issn        String?
+  subject     String
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  papers      Paper[]
+  issues      Issue[]
+}
+
+model Issue {
+  id          String    @id @default(cuid())
+  volume      Int
+  number      Int
+  year        Int
+  journalId   String
+  createdAt   DateTime  @default(now())
+
+  journal     Journal   @relation(fields: [journalId], references: [id])
+  papers      Paper[]
+}
+
+model Paper {
+  id              String            @id @default(cuid())
+  title           String
+  slug            String            @unique
+  abstract        String
+  keywords        String[]
+  fileUrl         String
+  status          SubmissionStatus  @default(PENDING)
+  authorId        String
+  journalId       String
+  issueId         String?
+  doi             String?
+  pages           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  author          User              @relation(fields: [authorId], references: [id])
+  journal         Journal           @relation(fields: [journalId], references: [id])
+  issue           Issue?            @relation(fields: [issueId], references: [id])
+  reviews         Review[]
+}
+
+model Review {
+  id          String    @id @default(cuid())
+  paperId     String
+  reviewerId  String
+  comment     String
+  decision    String
+  createdAt   DateTime  @default(now())
+
+  paper       Paper     @relation(fields: [paperId], references: [id])
+  reviewer    User      @relation(fields: [reviewerId], references: [id])
+}
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
